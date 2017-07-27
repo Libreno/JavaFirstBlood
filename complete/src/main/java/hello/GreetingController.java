@@ -37,13 +37,11 @@ public class GreetingController {
         headers.add("Accept", "*/*");
         RestTemplate rest = new RestTemplate();
         HttpEntity<String> requestEntity = new HttpEntity("", headers);
-        String url = String.format("http://api.stackexchange.com/2.2/search?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&order=desc&sort=activity&intitle=%s&filter=default",
-                URLEncoder.encode(searchData.getSearchString(), "UTF-8"));
+        String url = String.format("http://api.stackexchange.com/2.2/search?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&order=desc&sort=activity&intitle=%s&filter=default&pagesize=10&page=%d",
+                URLEncoder.encode(searchData.getSearchString()), searchData.getPageNumber(), "UTF-8");
         ResponseEntity<byte[]> responseEntity = rest.exchange(url, HttpMethod.GET, requestEntity, byte[].class);
-        //responseEntity.getStatusCode();
         byte[] bytes = responseEntity.getBody();
         String unzipped = Unzip(bytes);
-        searchData.setAnswers(unzipped);
         JSONObject json = (JSONObject) JSONValue.parse(unzipped);
         ArrayList<QuestionData> answersList = new ArrayList();
         if (json.containsKey("items")){
@@ -56,10 +54,13 @@ public class GreetingController {
                 q.setDate(date);
                 q.setAuthor((String)author.get("display_name"));
                 q.setTitle((String)item.get("title"));
+                q.setAnswered((boolean)item.get("is_answered"));
+                q.setLink((String)item.get("link"));
                 answersList.add(q);
             }
             searchData.setQuestions(answersList.toArray(new QuestionData[0]));
         }
+        searchData.setHasMore((boolean)json.get("has_more"));
         return "input";
     }
 

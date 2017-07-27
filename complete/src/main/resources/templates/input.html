@@ -1,16 +1,45 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head> 
-    <title>Getting Started: Handling Form Submission</title>
+    <title>Stackoverflow search</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!--script src="js/bootstrap.min.js"></script-->
 </head>
 <body>
-	<h1>Form</h1>
-    <form action="#" th:action="@{/SOSearch}" th:object="${searchData}" method="post">
-        <p>String to search: <input type="text" th:field="*{searchString}" /></p>
-        <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
-    </form>
-    <h1>Result</h1>
-    <p th:text="'content: ' + ${searchData.getAnswers()}" />
+    <div class="container">
+        <h1>Stackoverflow search</h1>
+        <form action="#" th:action="@{/SOSearch}" th:object="${searchData}" method="post">
+            <p>String to search: <input type="text" th:field="*{searchString}" />
+                <input type="submit" value="Search" />
+            </p>
+            <input type="hidden" th:field="*{pageNumber}" th:value="${searchData.pageNumber}"/>
+            <div th:if="${searchData.questions} != null and ${searchData.questions.length} > 0">
+                <p>
+                    <input type="submit" value="Prev" th:disabled="${searchData.pageNumber}"/>
+                    <input type="submit" value="Next" th:disabled="${!searchData.hasMore}"/>
+                </p>
+                <h1>Result</h1>
+                <p th:text="'Page №' + ${searchData.pageNumber}"/>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th th:text="Date">Date</th>
+                            <th th:text="Title">Title</th>
+                            <th th:text="Author">Author</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="qst: ${searchData.questions}" th:class="#{qst.isAnswered}? #{success}">
+                            <td th:text="${qst.Date}"></td>
+                            <td><a th:href="${qst.link}" th:text="${qst.Title}"></a></td>
+                            <td th:text="${qst.Author}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

@@ -4,6 +4,8 @@ public class QuestionData {
     private String Date;
     private String Title;
     private String Author;
+    private boolean isAnswered;
+    private String link;
 
     public String getDate() {
         return Date;
@@ -27,5 +29,21 @@ public class QuestionData {
 
     public void setAuthor(String author) {
         Author = author;
+    }
+
+    public boolean isAnswered() {
+        return isAnswered;
+    }
+
+    public void setAnswered(boolean answered) {
+        isAnswered = answered;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 }

@@ -5,7 +5,12 @@ public class SearchData {
     private long id;
     private String searchString;
     private QuestionData[] questions;
-    private String answers;
+    private Integer pageNumber;
+    private boolean hasMore;
+
+    public SearchData() {
+        pageNumber = 1;
+    }
 
     public long getId() {
         return id;
@@ -31,11 +36,19 @@ public class SearchData {
         this.questions = questions;
     }
 
-    public String getAnswers() {
-        return answers;
+    public Integer getPageNumber() {
+        return pageNumber;
     }
 
-    public void setAnswers(String answers) {
-        this.answers = answers;
+    public void setPageNumber(Integer pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public boolean isHasMore() {
+        return hasMore;
+    }
+
+    public void setHasMore(boolean hasMore) {
+        this.hasMore = hasMore;
     }
 }
