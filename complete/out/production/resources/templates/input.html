@@ -38,7 +38,7 @@
 </head>
 <body>
     <div class="container">
-        <form action="#" th:action="@{/SOSearch}" th:object="${searchData}" method="post" id = "mainForm">
+        <form th:action="@{/SOSearch}" th:object="${searchData}" method="post" id = "mainForm">
             <h1>Stackoverflow search</h1>
             <div class="form-group">
                 <label for="searchStringField">String to search:</label>
@@ -62,9 +62,10 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th th:text="Date">Date</th>
-                            <th th:text="Title">Title</th>
-                            <th th:text="Author">Author</th>
+                            <th th:text="Date"/>
+                            <th th:text="Title"/>
+                            <th th:text="Author"/>
+                            <th th:text="'Is answered'"/>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,6 +73,7 @@
                             <td th:text="${qst.Date}"></td>
                             <td><a th:href="${qst.link}" th:text="${qst.Title}"></a></td>
                             <td th:text="${qst.Author}"></td>
+                            <td><span th:class="${qst.isAnswered()} ? 'glyphicon glyphicon-ok'" aria-hidden="true"></span></td>
                         </tr>
                     </tbody>
                 </table>
