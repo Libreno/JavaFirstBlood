@@ -32,13 +32,27 @@ public class SOSearchController {
     }
 
     @PostMapping("/SOSearch")
-    public String searchSubmit(@ModelAttribute SearchData searchData) throws IOException {
-        byte[] bytes = performRequest(searchData);
-        String unzipped = unzip(bytes);
-        JSONObject json = (JSONObject) JSONValue.parse(unzipped);
-        ArrayList<QuestionData> answersList = extractQuestionData(json);
-        searchData.setQuestions(answersList.toArray(new QuestionData[0]));
-        searchData.setHasMore((boolean)json.get("has_more"));
+    public String searchSubmit(@ModelAttribute SearchData searchData){
+        if (searchData.getSearchString() == "")
+            return "input";
+        try {
+            byte[] bytes = performRequest(searchData);
+            String unzipped = unzip(bytes);
+            JSONObject json = (JSONObject) JSONValue.parse(unzipped);
+            ArrayList<QuestionData> answersList = extractQuestionData(json);
+            searchData.setQuestions(answersList.toArray(new QuestionData[0]));
+            if (searchData.getMaxVisitedPageNumber() <= searchData.getPageNumber()) {
+                searchData.setMaxVisitedPageNumber(searchData.getPageNumber());
+                searchData.setLastIsVisited(!(boolean)json.get("has_more"));
+            }
+
+            if (searchData.getSearchString() != null && searchData.getSearchString() != "" && (searchData.getQuestions() == null || searchData.getQuestions().length == 0))
+                searchData.setErrorMessage("Oh snap! String ''" + searchData.getSearchString() + "'' not found in question titles. Try to correct it and search again.");
+        }
+        catch (IOException ex)
+        {
+            searchData.setErrorMessage(ex.getMessage());
+        }
         return "input";
     }
 

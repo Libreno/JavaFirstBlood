@@ -5,10 +5,13 @@ public class SearchData {
     private String searchString;
     private QuestionData[] questions;
     private Integer pageNumber;
-    private boolean hasMore;
+    private Integer maxVisitedPageNumber;
+    private boolean lastIsVisited;
+    private String errorMessage;
 
     public SearchData() {
         pageNumber = 1;
+        maxVisitedPageNumber = 1;
     }
 
     public String getSearchString() {
@@ -35,11 +38,27 @@ public class SearchData {
         this.pageNumber = pageNumber;
     }
 
-    public boolean isHasMore() {
-        return hasMore;
+    public boolean getLastIsVisited() {
+        return lastIsVisited;
     }
 
-    public void setHasMore(boolean hasMore) {
-        this.hasMore = hasMore;
+    public void setLastIsVisited(boolean lastIsVisited) {
+        this.lastIsVisited = lastIsVisited;
+    }
+
+    public Integer getMaxVisitedPageNumber() {
+        return maxVisitedPageNumber;
+    }
+
+    public void setMaxVisitedPageNumber(Integer maxVisitedPageNumber) {
+        this.maxVisitedPageNumber = maxVisitedPageNumber;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

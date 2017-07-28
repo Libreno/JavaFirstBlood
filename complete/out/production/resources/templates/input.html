@@ -5,18 +5,31 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <style type="text/css">
-        .disabled {
+        .sosearch a.disabled {
             pointer-events: none;
             cursor: default;
             opacity: 0.6;
         }
+        .sosearch .table th {
+            text-align: center;
+        }
+        .sosearch h1 {
+            text-align: center;
+        }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script type="text/javascript">
+    <script th:inline="javascript">
         $(function() {
+            window.SOSearch = {};
+            window.SOSearch.searchString = $('#searchStringField').val();
             var pageNumberInput = $('input#pageNumberField');
+            var maxVisitedPageNumber = $('input#maxVisitedPageNumber');
             if (parseInt(pageNumberInput.val()) == 1){
                 $('#prevBtn').addClass('disabled');
+            };
+            var lastIsVisited = [[${searchData.lastIsVisited}]];
+            if (lastIsVisited){
+                $('#nextBtn').addClass('disabled');
             };
             $('#prevBtn').click(function(event) {
                 event.preventDefault();
@@ -25,58 +38,82 @@
             });
             $('#nextBtn').click(function(event) {
                 event.preventDefault();
-                pageNumberInput.val(parseInt(pageNumberInput.val()) + 1);
+                pageNumberInput.val(parseInt(maxVisitedPageNumber.val()) + 1);
                 $('#mainForm').submit();
             });
             $('#searchBtn').click(function(event) {
                 event.preventDefault();
                 pageNumberInput.val(1);
+                maxVisitedPageNumber.val(1);
+                $('#mainForm').submit();
+            });
+            $('#searchStringField').on("paste keyup", function(){
+                if (SOSearch.searchString != $(this).val()) {
+                    var sr = $('.searchResults');
+                    if (sr != null)
+                        sr.remove();
+                }
+            });
+            $('a.goToPage').click(function(event){
+                var page = $(this).text();
+                if (pageNumberInput.val() == page)
+                    return;
+                pageNumberInput.val(page);
                 $('#mainForm').submit();
             });
         });
     </script>
 </head>
 <body>
-    <div class="container">
+    <div class="container sosearch">
+        <h1>Stackoverflow search</h1>
         <form th:action="@{/SOSearch}" th:object="${searchData}" method="post" id = "mainForm">
-            <h1>Stackoverflow search</h1>
             <div class="form-group">
-                <label for="searchStringField">String to search:</label>
-                <input type="text" th:field="*{searchString}" id="searchStringField"/>
-                <input class="btn btn-default" type="submit" value="Search" id="searchBtn"/>
+                <div class="row">
+                    <div class="col-xs-11">
+                        <input type="text" th:field="*{searchString}" id="searchStringField" class="form-control"/>
+                    </div>
+                    <div class="col-xs-1">
+                        <input class="btn btn-default" type="submit" value="Go" id="searchBtn"/>
+                    </div>
+                </div>
             </div>
             <input type="hidden" th:field="*{pageNumber}" th:value="${searchData.pageNumber}" id="pageNumberField"/>
-            <div th:if="${searchData.searchString} != null and (${searchData.questions} == null or ${searchData.questions.length} == 0)">
-                <div class="alert alert-danger" role="alert" th:text="'Oh snap! String \'' + ${searchData.searchString} + '\' not found in question titles. Try to correct it and search again.'"/>
-            </div>
-            <div th:if="${searchData.questions} != null and ${searchData.questions.length} > 0">
-                <div class="alert alert-success" role="alert" th:text="'Well done! You successfully searched \'' + ${searchData.searchString} + '\' on www.stackoverflow.com with the following results:'"/>
-                <p>
-                    <ul class="pagination">
-                        <li><a href="#" id="prevBtn" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
-                        <li><a href="#" th:text="${searchData.pageNumber}"></a></li>
-                        <li><a href="#" id="nextBtn" aria-label="Next"><span aria-hidden="true">»</span></a></li>
-                    </ul>
-                </p>
+            <input type="hidden" th:field="*{maxVisitedPageNumber}" th:value="${searchData.maxVisitedPageNumber}" id="maxVisitedPageNumber"/>
+            <input type="hidden" th:field="*{lastIsVisited}" th:value="${searchData.lastIsVisited}" id="lastIsVisited"/>
+            <div class="searchResults">
+                <div th:if="*{errorMessage} != null">
+                    <div class="alert alert-danger" role="alert" th:text="*{errorMessage}"/>
+                </div>
+                <div th:if="${searchData.questions} != null and ${searchData.questions.length} > 0">
+                    <div class="alert alert-success" role="alert" th:text="'Well done! You successfully searched \'' + ${searchData.searchString} + '\' on www.stackoverflow.com with the following results:'"/>
+                    <p>
+                        <ul class="pagination">
+                            <li><a href="#" id="prevBtn" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+                            <li th:each="i : ${#numbers.sequence( 1, searchData.maxVisitedPageNumber)}"><a href="#" class="goToPage" th:text="${i}" th:style="${searchData.pageNumber} == ${i} ? 'background-color:#a4d9ff'"></a></li>
+                            <li><a href="#" id="nextBtn" aria-label="Next"><span aria-hidden="true">»</span></a></li>
+                        </ul>
+                    </p>
 
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th th:text="Date"/>
-                            <th th:text="Title"/>
-                            <th th:text="Author"/>
-                            <th th:text="'Is answered'"/>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="qst: ${searchData.questions}" th:class="${qst.isAnswered()} ? success">
-                            <td th:text="${qst.Date}"></td>
-                            <td><a th:href="${qst.link}" th:text="${qst.Title}"></a></td>
-                            <td th:text="${qst.Author}"></td>
-                            <td><span th:class="${qst.isAnswered()} ? 'glyphicon glyphicon-ok'" aria-hidden="true"></span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="col-md-2" th:text="Date"/>
+                                <th class="col-md-7" th:text="Title"/>
+                                <th class="col-md-1" th:text="Author"/>
+                                <th class="col-md-1" th:text="'Is answered'"/>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="qst: ${searchData.questions}" th:class="${qst.isAnswered()} ? success">
+                                <td class="col-md-2" th:text="${qst.Date}"></td>
+                                <td class="col-md-7"><a th:href="${qst.link}" th:text="${qst.Title}"></a></td>
+                                <td class="col-md-1" th:text="${qst.Author}"></td>
+                                <td class="col-md-1"><span th:class="${qst.isAnswered()} ? 'glyphicon glyphicon-ok'" aria-hidden="true"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </form>
     </div>
