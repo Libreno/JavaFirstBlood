@@ -4,24 +4,61 @@
     <title>Stackoverflow search</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <style type="text/css">
+        .disabled {
+            pointer-events: none;
+            cursor: default;
+            opacity: 0.6;
+        }
+    </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!--script src="js/bootstrap.min.js"></script-->
+    <script type="text/javascript">
+        $(function() {
+            var pageNumberInput = $('input#pageNumberField');
+            if (parseInt(pageNumberInput.val()) == 1){
+                $('#prevBtn').addClass('disabled');
+            };
+            $('#prevBtn').click(function(event) {
+                event.preventDefault();
+                pageNumberInput.val(parseInt(pageNumberInput.val()) - 1);
+                $('#mainForm').submit();
+            });
+            $('#nextBtn').click(function(event) {
+                event.preventDefault();
+                pageNumberInput.val(parseInt(pageNumberInput.val()) + 1);
+                $('#mainForm').submit();
+            });
+            $('#searchBtn').click(function(event) {
+                event.preventDefault();
+                pageNumberInput.val(1);
+                $('#mainForm').submit();
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1>Stackoverflow search</h1>
-        <form action="#" th:action="@{/SOSearch}" th:object="${searchData}" method="post">
-            <p>String to search: <input type="text" th:field="*{searchString}" />
-                <input type="submit" value="Search" />
-            </p>
-            <input type="hidden" th:field="*{pageNumber}" th:value="${searchData.pageNumber}"/>
+        <form action="#" th:action="@{/SOSearch}" th:object="${searchData}" method="post" id = "mainForm">
+            <h1>Stackoverflow search</h1>
+            <div class="form-group">
+                <label for="searchStringField">String to search:</label>
+                <input type="text" th:field="*{searchString}" id="searchStringField"/>
+                <input class="btn btn-default" type="submit" value="Search" id="searchBtn"/>
+            </div>
+            <input type="hidden" th:field="*{pageNumber}" th:value="${searchData.pageNumber}" id="pageNumberField"/>
+            <div th:if="${searchData.searchString} != null and (${searchData.questions} == null or ${searchData.questions.length} == 0)">
+                <div class="alert alert-danger" role="alert" th:text="'Oh snap! String \'' + ${searchData.searchString} + '\' not found in question titles. Try to correct it and search again.'"/>
+            </div>
             <div th:if="${searchData.questions} != null and ${searchData.questions.length} > 0">
+                <div class="alert alert-success" role="alert" th:text="'Well done! You successfully searched \'' + ${searchData.searchString} + '\' on www.stackoverflow.com with the following results:'"/>
                 <p>
-                    <input type="submit" value="Prev" th:disabled="${searchData.pageNumber}"/>
-                    <input type="submit" value="Next" th:disabled="${!searchData.hasMore}"/>
+                    <ul class="pagination">
+                        <li><a href="#" id="prevBtn" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+                        <li><a href="#" th:text="${searchData.pageNumber}"></a></li>
+                        <li><a href="#" id="nextBtn" aria-label="Next"><span aria-hidden="true">»</span></a></li>
+                    </ul>
                 </p>
-                <h1>Result</h1>
-                <p th:text="'Page №' + ${searchData.pageNumber}"/>
+
                 <table class="table">
                     <thead>
                         <tr>
@@ -31,7 +68,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="qst: ${searchData.questions}" th:class="#{qst.isAnswered}? #{success}">
+                        <tr th:each="qst: ${searchData.questions}" th:class="${qst.isAnswered()} ? success">
                             <td th:text="${qst.Date}"></td>
                             <td><a th:href="${qst.link}" th:text="${qst.Title}"></a></td>
                             <td th:text="${qst.Author}"></td>

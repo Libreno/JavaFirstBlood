@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hello;
+package StackOverflowSearch;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,15 +39,14 @@ public class ApplicationTest {
 
     @Test
     public void rendersForm() throws Exception {
-        mockMvc.perform(get("/greeting"))
+        mockMvc.perform(get("/SOSearch"))
                 .andExpect(content().string(containsString("Form")));
     }
 
     @Test
     public void submitsForm() throws Exception {
-        mockMvc.perform(post("/greeting").param("id", "12345").param("content", "Hello"))
-                .andExpect(content().string(containsString("Result")))
-                .andExpect(content().string(containsString("id: 12345")));
+        mockMvc.perform(post("/SOSearch").param("searchString", "ko"))
+                .andExpect(content().string(containsString("results")))
+                .andExpect(content().string(containsString("Title")));
     }
-
 }

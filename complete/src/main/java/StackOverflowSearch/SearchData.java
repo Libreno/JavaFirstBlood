@@ -1,8 +1,7 @@
-package hello;
+package StackOverflowSearch;
 
 public class SearchData {
 
-    private long id;
     private String searchString;
     private QuestionData[] questions;
     private Integer pageNumber;
@@ -10,14 +9,6 @@ public class SearchData {
 
     public SearchData() {
         pageNumber = 1;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getSearchString() {
