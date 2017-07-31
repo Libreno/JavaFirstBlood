@@ -16,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import org.unbescape.html.HtmlEscape;
 
 import java.io.*;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,9 +81,8 @@ public class SOSearchController {
         headers.add("Accept", "*/*");
         RestTemplate rest = new RestTemplate();
         HttpEntity<String> requestEntity = new HttpEntity("", headers);
-        String url = String.format("http://api.stackexchange.com/2.2/search?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&order=desc&sort=activity&intitle=%s&filter=default&pagesize=10&page=%d",
-                URLEncoder.encode(searchData.getSearchString()), searchData.getPageNumber(), "UTF-8");
-        ResponseEntity<byte[]> responseEntity = rest.exchange(url, HttpMethod.GET, requestEntity, byte[].class);
+        String url = "http://api.stackexchange.com/2.2/search?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&order=desc&sort=activity&intitle={searchString}&filter=default&pagesize=10&page={pageNumber}";
+        ResponseEntity<byte[]> responseEntity = rest.exchange(url, HttpMethod.GET, requestEntity, byte[].class, searchData.getSearchString(), searchData.getPageNumber());
         return responseEntity.getBody();
     }
 
